@@ -561,14 +561,9 @@
     function openDetail(idx) {
   const d = DATA[idx];
 
-  // 🔥 เคลียร์สถานะเก่า
-  document.getElementById('detailModal').classList.remove('open');
-
   galImages = (d.gallery && d.gallery.length > 0)
     ? d.gallery
     : [IMGS[idx % IMGS.length]];
-
-  if (!galImages.length) return;
 
   galIndex = 0;
 
@@ -609,26 +604,7 @@
   tagEl.className = `modal-tag tag-${d.type}`;
   tagEl.textContent = typeMap[d.type] || 'ไม่ระบุ';
 
-  let opened = false;
-
-  const firstImg = new Image();
-  firstImg.src = galImages[0];
-
-  firstImg.onload = () => {
-    if (opened) return;
-    opened = true;
-
-    setTimeout(() => {
-      document.getElementById('detailModal').classList.add('open');
-    }, 60);
-  };
-
-  setTimeout(() => {
-    if (!opened) {
-      document.getElementById('detailModal').classList.add('open');
-    }
-  }, 300);
-
+  document.getElementById('detailModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
     function closeDetail() {
