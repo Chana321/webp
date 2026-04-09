@@ -489,9 +489,7 @@
   <canvas id="bgCanvas"></canvas>
 
   <div class="page">
-    <div class="nav">
-      <img src="img/logo.png" class="logo">
-    </div>
+    
 
     <div class="hero">
       <div class="hero-left">
@@ -560,44 +558,44 @@
       'large-land': 'ที่แปลงใหญ่'
     };
 
-   function openDetail(idx) {
+    function openDetail(idx) {
   const d = DATA[idx];
+
+  // 🔥 เคลียร์สถานะเก่า
+  document.getElementById('detailModal').classList.remove('open');
 
   galImages = (d.gallery && d.gallery.length > 0)
     ? d.gallery
     : [IMGS[idx % IMGS.length]];
 
+  if (!galImages.length) return;
+
   galIndex = 0;
 
   const track = document.getElementById('galTrack');
 
-  // 🔥 สร้าง slide
   track.innerHTML = galImages.map(src => `
     <div class="gal-slide">
       <img src="${src}" draggable="false">
     </div>
   `).join('');
 
-  // รีเซ็ตตำแหน่ง
   track.style.transform = `translateX(0%)`;
 
   buildDots();
 
-  // --- ข้อมูลอื่น ---
+  requestAnimationFrame(() => {
+    document.querySelector('.modal-body').scrollTop = 0;
+  });
+
+  // ✅ ข้อมูล
   document.getElementById('modalTitle').textContent = d.title;
   document.getElementById('modalPrice').textContent = d.price + ' บาท';
   document.getElementById('modalArea').textContent = d.area;
   document.getElementById('modalDesc').textContent = d.desc;
   document.getElementById('modalType').textContent = typeMap[d.type] || 'ไม่ระบุ';
 
-  const mapBtn = document.getElementById('btnMap');
-  if (d.map) {
-    mapBtn.href = d.map;
-    mapBtn.style.display = 'flex';
-  } else {
-    mapBtn.style.display = 'none';
-  }
-
+  // ✅ location
   document.getElementById('modalLoc').innerHTML = `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 21s-7-6.5-7-11a7 7 0 0114 0c0 4.5-7 11-7 11z"/>
@@ -606,14 +604,33 @@
     ${d.loc}
   `;
 
+  // ✅ tag
   const tagEl = document.getElementById('modalTag');
   tagEl.className = `modal-tag tag-${d.type}`;
   tagEl.textContent = typeMap[d.type] || 'ไม่ระบุ';
 
-  document.getElementById('detailModal').classList.add('open');
+  let opened = false;
+
+  const firstImg = new Image();
+  firstImg.src = galImages[0];
+
+  firstImg.onload = () => {
+    if (opened) return;
+    opened = true;
+
+    setTimeout(() => {
+      document.getElementById('detailModal').classList.add('open');
+    }, 60);
+  };
+
+  setTimeout(() => {
+    if (!opened) {
+      document.getElementById('detailModal').classList.add('open');
+    }
+  }, 300);
+
   document.body.style.overflow = 'hidden';
 }
-
     function closeDetail() {
       document.getElementById('detailModal').classList.remove('open');
       document.body.style.overflow = '';
