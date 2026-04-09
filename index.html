@@ -190,20 +190,19 @@
 .gal-track {
   display: flex;
   height: 100%;
-  transition: transform 0.35s cubic-bezier(.22,.61,.36,1); /* ลื่นแบบ native */
-  will-change: transform;
+  transition: transform 0.45s cubic-bezier(.25,.8,.25,1);
 }
 
 .gal-slide {
-  min-width: 100%;
+  flex: 0 0 100%;  /* 🔥 ตัวนี้จบปัญหา */
   height: 100%;
-  flex-shrink: 0;
 }
 
 .gal-slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
     .gal-btn{
       position:absolute;top:50%;transform:translateY(-50%);
