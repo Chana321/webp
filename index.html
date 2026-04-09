@@ -181,8 +181,30 @@
     @keyframes popIn{from{transform:scale(0.88);opacity:0}to{transform:scale(1);opacity:1}}
 
     /* Gallery */
-    .modal-gallery{position:relative;height:280px;background:#dde8f5;flex-shrink:0;overflow:hidden}
-    .modal-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition: opacity 0.3s ease;}
+   .modal-gallery {
+  position: relative;
+  height: 280px;
+  overflow: hidden;
+}
+
+.gal-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.35s cubic-bezier(.22,.61,.36,1); /* ลื่นแบบ native */
+  will-change: transform;
+}
+
+.gal-slide {
+  min-width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.gal-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
     .gal-btn{
       position:absolute;top:50%;transform:translateY(-50%);
       background:rgba(255,255,255,.82);border:none;cursor:pointer;
@@ -412,7 +434,7 @@
     <div class="modal-box">
       <div class="modal-gallery">
         <button class="modal-close" onclick="closeDetail()">✕</button>
-        <img id="galImg" src="" alt="">
+        <div class="gal-track" id="galTrack"></div>
         <button class="gal-btn gal-prev" onclick="galMove(-1)">‹</button>
         <button class="gal-btn gal-next" onclick="galMove(1)">›</button>
         <div class="gal-dots" id="galDots"></div>
@@ -520,13 +542,16 @@
 
   <script>
 
+
+    let galImages = [];
+    let galIndex = 0;
+
     function toggleFAB() {
   document.getElementById('fabMain').classList.toggle('active');
   document.getElementById('fabOptions').classList.toggle('show');
 }
     /* ── Gallery state ── */
-    let galImages = [];
-    let galIndex = 0;
+    
 
     // Map ภาษาไทยสำหรับแสดงผล
     const typeMap = {
@@ -535,41 +560,56 @@
       'large-land': 'ที่แปลงใหญ่'
     };
 
-   function openDetail(idx, imgIdx) {
+   function openDetail(idx) {
   const d = DATA[idx];
-  
-  // เปลี่ยนจาก d.images เป็น d.gallery ให้ตรงกับข้อมูลด้านล่าง
-  galImages = (d.gallery && d.gallery.length > 0) ? d.gallery : [IMGS[idx % IMGS.length]];
-  
+
+  galImages = (d.gallery && d.gallery.length > 0)
+    ? d.gallery
+    : [IMGS[idx % IMGS.length]];
+
   galIndex = 0;
 
-  document.getElementById('galImg').src = galImages[galIndex];
+  const track = document.getElementById('galTrack');
+
+  // 🔥 สร้าง slide
+  track.innerHTML = galImages.map(src => `
+    <div class="gal-slide">
+      <img src="${src}" draggable="false">
+    </div>
+  `).join('');
+
+  // รีเซ็ตตำแหน่ง
+  track.style.transform = `translateX(0%)`;
+
+  buildDots();
+
+  // --- ข้อมูลอื่น ---
   document.getElementById('modalTitle').textContent = d.title;
   document.getElementById('modalPrice').textContent = d.price + ' บาท';
   document.getElementById('modalArea').textContent = d.area;
   document.getElementById('modalDesc').textContent = d.desc;
-  
   document.getElementById('modalType').textContent = typeMap[d.type] || 'ไม่ระบุ';
 
   const mapBtn = document.getElementById('btnMap');
   if (d.map) {
-      mapBtn.href = d.map;
-      mapBtn.style.display = 'flex'; // แสดงปุ่มเมื่อมีข้อมูล
+    mapBtn.href = d.map;
+    mapBtn.style.display = 'flex';
   } else {
-      mapBtn.href = '#';
-      mapBtn.style.display = 'none'; // ซ่อนปุ่มถ้าไม่มีข้อมูล map
+    mapBtn.style.display = 'none';
   }
 
-  const locEl = document.getElementById('modalLoc');
-  locEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M12 21s-7-6.5-7-11a7 7 0 0114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>${d.loc}`;
+  document.getElementById('modalLoc').innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 21s-7-6.5-7-11a7 7 0 0114 0c0 4.5-7 11-7 11z"/>
+      <circle cx="12" cy="10" r="2.5"/>
+    </svg>
+    ${d.loc}
+  `;
 
   const tagEl = document.getElementById('modalTag');
   tagEl.className = `modal-tag tag-${d.type}`;
   tagEl.textContent = typeMap[d.type] || 'ไม่ระบุ';
 
-  
-
-  buildDots();
   document.getElementById('detailModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -591,25 +631,21 @@
     }
 
     function galMove(dir) {
-  const img = document.getElementById('galImg');
-  img.style.opacity = '0';
-  setTimeout(() => {
-    galIndex = (galIndex + dir + galImages.length) % galImages.length;
-    img.src = galImages[galIndex];
-    img.style.opacity = '1';
-    buildDots();
-  }, 250);
+  galIndex = (galIndex + dir + galImages.length) % galImages.length;
+
+  const track = document.getElementById('galTrack');
+  track.style.transform = `translateX(-${galIndex * 100}%)`;
+
+  buildDots();
 }
 
     function galJump(i) {
-  const img = document.getElementById('galImg');
-  img.style.opacity = '0';
-  setTimeout(() => {
-    galIndex = i;
-    img.src = galImages[galIndex];
-    img.style.opacity = '1';
-    buildDots();
-  }, 250);
+  galIndex = i;
+
+  const track = document.getElementById('galTrack');
+  track.style.transform = `translateX(-${galIndex * 100}%)`;
+
+  buildDots();
 }
     /* ── Animated background ── */
     (function () {
