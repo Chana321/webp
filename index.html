@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LAND PRIME</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --blue:#185FA5;--blue-light:#E6F1FB;--blue-mid:#378ADD;
+      --green-light:#EAF3DE;--green-dark:#3B6D11;
+      --coral-light:#FAECE7;--coral-dark:#993C1D;
+      --yellow-light:#FEF9C3;--yellow-dark:#854D0E;
+      --gray:#6b7280;--border:#e5e7eb;--bg:#f0f4f9;
+    }
+    body{font-family:'Prompt',sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;overflow-x:hidden}
+    #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .page{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:0 28px 60px}
+    .hero{padding:56px 0 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:32px}
+    .hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--blue);background:var(--blue-light);padding:5px 14px;border-radius:20px;margin-bottom:18px;text-transform:uppercase}
+    .hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue-mid);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+    .hero h1{font-size:clamp(32px,5vw,52px);font-weight:700;line-height:1.15;color:#0f172a;margin-bottom:10px}
+    .hero h1 span{color:var(--blue-mid)}
+    .hero-sub{font-size:15px;color:var(--gray)}
+    .hero-stat {
+    background: rgb(255, 255, 255);
+    border: 1px solid var(--border);
+    border-radius: 20px;       /* เท่ากับ .chip */
+    padding: 7px 18px;         /* เท่ากับ .chip */
+    display: inline-flex;      /* เปลี่ยนเป็น flex เพื่อให้เนื้อหาอยู่บรรทัดเดียว */
+    align-items: center;
+    gap: 6px;                  /* ระยะห่างระหว่างตัวเลขกับตัวอักษร */
+    min-width: auto;           /* ยกเลิกความกว้างขั้นต่ำ */
+}
+    .hero-stat-n {
+    font-size: 20px;           /* ลดจาก 36px */
+    font-weight: 700;
+    color: var(--blue);
+    line-height: 1.1;
+}
+    .hero-stat-l {
+    font-size: 14px;           /* ลดจาก 13px */
+    color: var(--gray);
+    margin-top: 2px;           /* ลดระยะห่างด้านบน */
+}
+    /* --- ส่วนฟิลเตอร์ที่ปรับให้ Responsive --- */
+    .filters-bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap; 
+        margin-bottom: 32px;
+        align-items: center;
+    }
+
+    .filters-label {
+        font-size: 13px;
+        color: var(--gray);
+        margin-right: 4px;
+        /* มือถือ: ให้คำว่า "กรอง :" แยกบรรทัดเพื่อให้ปุ่มเรียงกันสวย */
+        flex: 0 0 100%; 
+        margin-bottom: 4px;
+    }
+
+    .chip {
+        font-family: 'Prompt', sans-serif;
+        font-size: 13px;
+        padding: 10px 18px; 
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--gray);
+        cursor: pointer;
+        transition: all .2s;
+        /* มือถือ: แบ่ง 2 คอลัมน์ (50% - ระยะห่าง) */
+        flex: 1 1 calc(50% - 8px); 
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .chip:hover { border-color: var(--blue-mid); color: var(--blue-mid); }
+    .chip.active {
+        background: var(--blue);
+        color: white;
+        border-color: var(--blue);
+        box-shadow: 0 4px 14px rgba(24, 95, 165, 0.3);
+    }
+
+    /* สถิติผลการค้นหา */
+    .hero-stat {
+        flex: 0 0 100%; 
+        justify-content: center;
+        margin-top: 8px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 7px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* --- ปรับแต่งสำหรับหน้าจอ Desktop (กว้างกว่า 768px) --- */
+    @media (min-width: 768px) {
+        .filters-label {
+            flex: 0 0 auto; 
+            margin-bottom: 0;
+        }
+        .chip {
+            flex: 0 0 auto; /* ปุ่มกว้างตามตัวอักษร ไม่ขยายเต็มหน้าจอ */
+            padding: 7px 18px;
+        }
+        .hero-stat {
+            flex: 0 0 auto;
+            margin-top: 0;
+            margin-left: auto; /* ดันสถิติไปไว้ขวาสุด */
+        }
+    }
+
+    .sec-label {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--gray);
+        margin-bottom: 18px;
+    }
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:20px}
+    .card{background:white;border:1px solid var(--border);border-radius:18px;overflow:hidden;position:relative;opacity:0;transform:translateY(24px)}
+    .card.visible{opacity:1;transform:translateY(0);transition:opacity .45s ease,transform .45s ease,box-shadow .25s,border-color .2s}
+    .card.visible:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 20px 48px rgba(0,0,0,.10);border-color:#c7d9ef}
+    .card::after{content:'';position:absolute;inset:0;border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,rgba(255,255,255,0) 60%);opacity:0;transition:opacity .25s;pointer-events:none}
+    .card.visible:hover::after{opacity:1}
+    .card-img{position:relative;height:182px;overflow:hidden;background:var(--blue-light)}
+    .card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+    .card.visible:hover .card-img img{transform:scale(1.06)}
+    .card-tag{position:absolute;top:11px;left:11px;font-size:11px;font-weight:600;padding:3px 11px;border-radius:20px}
+    
+    /* ── สีป้ายกำกับใหม่ ── */
+    .tag-house { background: var(--blue-light); color: var(--blue); }
+    .tag-landhouse { background: var(--green-light); color: var(--green-dark); }
+    .tag-large-land { background: var(--yellow-light); color: var(--yellow-dark); }
+
+    .card-fav{position:absolute;top:11px;right:11px;width:32px;height:32px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px}
+    .card-body{padding:16px 18px 18px}
+    .card-loc{font-size:11px;color:var(--gray);margin-bottom:5px;display:flex;align-items:center;gap:4px}
+    .card-loc svg{width:11px;height:11px;flex-shrink:0}
+    .card-name{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:6px}
+    .card-desc{font-size:13px;color:var(--gray);margin-bottom:14px;line-height:1.55}
+    .card-foot{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+    .card-price{font-size:18px;font-weight:700;color:var(--blue)}
+    .card-price small{font-size:11px;font-weight:400;color:var(--gray);margin-left:3px}
+    .card-area{font-size:12px;color:var(--gray)}
+    .card-btn{display:block;width:100%;padding:10px;text-align:center;border-radius:10px;border:1px solid var(--border);font-family:'Prompt',sans-serif;font-size:13px;font-weight:500;color:#0f172a;cursor:pointer;background:none;transition:background .15s,border-color .15s,color .15s}
+    .card-btn:hover{background:var(--blue);color:white;border-color:var(--blue)}
+    .empty{grid-column:1/-1;text-align:center;padding:48px;color:var(--gray);font-size:14px}
+    footer{text-align:center;padding:40px 0 0;color:#adb5bd;font-size:13px}
+    .nav{position:fixed;top:20px;left:30px;z-index:999}
+    .logo{height:40px;width:auto;object-fit:contain;cursor:pointer;transition:transform .2s ease}
+    .logo:hover{transform:scale(1.05)}
+
+    /* ── Detail Modal ── */
+    .modal-overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,0.58);
+      display:none;align-items:center;justify-content:center;
+      z-index:9999;padding:16px;
+    }
+    .modal-overlay.open{display:flex}
+    .modal-box{
+      background:white;
+      width:100%;max-width:660px;
+      border-radius:22px;
+      overflow:hidden;
+      animation:popIn .3s cubic-bezier(.22,.68,0,1.2);
+      max-height:92vh;
+      display:flex;flex-direction:column;
+    }
+    @keyframes popIn{from{transform:scale(0.88);opacity:0}to{transform:scale(1);opacity:1}}
+
+    /* Gallery */
+    .modal-gallery{position:relative;height:280px;background:#dde8f5;flex-shrink:0;overflow:hidden}
+    .modal-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .25s}
+    .gal-btn{
+      position:absolute;top:50%;transform:translateY(-50%);
+      background:rgba(255,255,255,.82);border:none;cursor:pointer;
+      width:38px;height:38px;border-radius:50%;font-size:20px;
+      display:flex;align-items:center;justify-content:center;
+      transition:background .15s;color:#0f172a;z-index:2;
+    }
+    .gal-btn:hover{background:white}
+    .gal-prev{left:12px}
+    .gal-next{right:12px}
+    .gal-dots{
+      position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+      display:flex;gap:6px;z-index:2;
+    }
+    .gal-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.5);cursor:pointer;transition:background .2s}
+    .gal-dot.active{background:white}
+    .modal-close{
+      position:absolute;top:12px;right:12px;
+      width:34px;height:34px;border-radius:50%;
+      background:rgba(255,255,255,.85);border:none;cursor:pointer;
+      font-size:17px;display:flex;align-items:center;justify-content:center;
+      color:#0f172a;z-index:10;transition:background .15s;
+    }
+    .modal-close:hover{background:white}
+
+    /* Body */
+    .modal-body{padding:22px 24px 26px;overflow-y:auto}
+    .modal-tag-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+    .modal-tag{font-size:11px;font-weight:600;padding:3px 12px;border-radius:20px}
+    .modal-title{font-size:21px;font-weight:700;color:#0f172a;margin-bottom:5px;line-height:1.3}
+    .modal-loc{font-size:13px;color:var(--gray);display:flex;align-items:center;gap:4px;margin-bottom:20px}
+    .modal-loc svg{width:13px;height:13px;flex-shrink:0}
+
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+    .detail-item{background:var(--bg);border-radius:12px;padding:12px 14px}
+    .detail-label{font-size:11px;color:var(--gray);margin-bottom:4px}
+    .detail-value{font-size:15px;font-weight:600;color:#0f172a}
+    .detail-price .detail-value{color:var(--blue);font-size:17px}
+
+    .modal-section-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);margin-bottom:7px}
+    .modal-desc-text{font-size:14px;color:#374151;line-height:1.75;margin-bottom:22px}
+
+    .modal-cta{display:flex;gap:10px;flex-wrap:wrap}
+   /* สไตล์พื้นฐานของทุกปุ่มใน Modal */
+/* --- ส่วนปุ่มหลัก --- */
+.btn-primary, .btn-line, .btn-map {
+    flex: 1;
+    min-width: 80px;          /* ลดจาก 130px ให้เล็กลง */
+    padding: 10px 4px;        /* ลดความหนาของปุ่ม */
+    border-radius: 12px;
+    text-decoration: none;    /* เอาเส้นใต้ออกสำหรับแท็ก a */
+    font-family: 'Prompt', sans-serif;
+    font-size: 13px;          /* ลดขนาดตัวอักษรลงเล็กน้อยให้พอดีปุ่ม */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all .15s;
+    color: white !important;
+}
+
+/* สีเดิมที่คุณใช้ */
+.btn-primary { background: var(--blue); }
+.btn-primary:hover { background: #0c477d; }
+
+.btn-line { background: #00b900; }
+.btn-line:hover { opacity: .88; }
+
+.btn-map { background: #00026e; } /* สีแดงสำหรับ Google Maps */
+
+/* --- ส่วนปุ่มปิด (ปุ่ม Outline) --- */
+.btn-outline {
+    flex: 1;
+    min-width: 80px;
+    padding: 10px 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: white;
+    font-family: 'Prompt', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #0f172a;
+    cursor: pointer;
+    transition: background .15s;
+}
+.btn-outline:hover { background: var(--bg); }
+    @media(max-width:500px){
+      .detail-grid{grid-template-columns:1fr 1fr}
+      .modal-gallery{height:280px}
+    }
+
+/* คอนเทนเนอร์หลักของปุ่ม FAB */
+.fab-wrapper {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 9999; /* ให้ลอยทับทุกอย่าง */
+    display: flex;
+    flex-direction: column; /* เรียงจากบนลงล่าง */
+    align-items: center;
+    gap: 12px;
+}
+
+/* คอนเทนเนอร์สำหรับปุ่มย่อย (FB, Line, Tel) */
+.fab-options {
+    display: flex;
+    flex-direction: column; /* ปุ่มย่อยเรียงต่อกันในแนวตั้ง */
+    gap: 10px;
+    visibility: hidden;
+    opacity: 0;
+    /* จุดสำคัญ: ให้เริ่มจากข้างล่างแล้วค่อยพุ่งขึ้น */
+    transform: translateY(40px) scale(0.6); 
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform, opacity;
+}
+
+/* แสดงปุ่มย่อยเมื่อถูกสั่งโชว์ */
+.fab-options.show {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1); /* พุ่งขึ้นมาที่ตำแหน่งปกติเหนือปุ่มหลัก */
+}
+
+/* ✅ ปรับแต่งปุ่มหลัก: ไร้ขอบ และพื้นหลังสีเทาจางๆ แบบในรูป */
+.fab-main {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    /* ✅ เปลี่ยนเป็นสีเทาจางๆ (สมมติว่าเป็นสีเทาอ่อนๆ) */
+    background: #f1f3f5; 
+    /* ✅ เอา border ออก (ไร้ขอบ) */
+    border: none; 
+    /* ✅ เงาให้นุ่มนวลขึ้นเพื่อให้ปุ่มดู "ลอย" ขึ้นมา */
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15); 
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 2;
+    padding: 0; /* เคลียร์ padding เพื่อให้รูปอยู่กึ่งกลาง */
+    overflow: hidden;
+    will-change: transform, background;
+    /* ✅ เพิ่ม 3 บรรทัดนี้เพื่อแก้ปัญหาขอบส้ม/ขอบฟ้า */
+    outline: none;           /* ลบเส้นขอบ Focus ของ Browser */
+    -webkit-tap-highlight-color: transparent; /* ลบแถบสีเวลาแตะในมือถือ */
+    user-select: none;       /* ป้องกันการคลุมดำที่รูปภาพ */
+    
+}
+
+/* จัดการขนาดรูปภาพข้างในปุ่มหลัก (หูฟัง) */
+.fab-main img {
+    width: 32px;  /* ขนาดที่เหมาะสมกับปุ่ม 56px */
+    height: 32px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+/* เมื่อกดเปิดเมนู (Active) */
+.fab-main.active {
+    /* ให้ขยายตัวเล็กน้อยแทนการหมุน */
+    transform: scale(1.1); 
+    /* ✅ เปลี่ยนพื้นหลังให้เข้มขึ้นนิดหน่อย */
+    background: #e9ecef; 
+    /* ✅ เอา border-color ออกเช่นกัน */
+}
+
+/* สไตล์ของปุ่มย่อย (FB, Line, Tel) */
+.fab-mini {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+
+/* เอฟเฟกต์เมื่อเมาส์ชี้ไปที่ปุ่มย่อย */
+.fab-mini:hover { transform: scale(1.1); }
+.fab-mini.line { background: #00b900; }
+.fab-mini.tel { background: var(--blue-mid); }
+.fab-mini.fb { background: #1877F2; }
+
+/* --- ส่วนของ Responsive (ทำให้เล็กลงในมือถือ) --- */
+@media (max-width: 480px) {
+  .fab-wrapper {
+    bottom: 20px; /* ชิดขอบล่างขึ้นอีกนิด */
+    right: 20px;
+    gap: 8px; /* ลดระยะห่างระหว่างปุ่ม */
+  }
+
+  /* ปุ่มหลัก (+) ให้เล็กลง */
+  .fab-main {
+    width: 45px;
+    height: 45px;
+  }
+
+  /* ปรับขนาดรูปในมือถือให้เล็กลงตามปุ่ม */
+  .fab-main img {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* ปุ่มย่อย (FB, Line, Tel) ให้เล็กลง */
+  .fab-mini {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* ปรับระยะพุ่งตอนดีดขึ้นให้สั้นลงตามขนาดปุ่ม */
+  .fab-options {
+    transform: translateY(20px) scale(0.6);
+    gap: 8px;
+  }
+}
+  </style>
+</head>
+
+<body>
+
+  <div class="modal-overlay" id="detailModal" onclick="overlayClick(event)">
+    <div class="modal-box">
+      <div class="modal-gallery">
+        <button class="modal-close" onclick="closeDetail()">✕</button>
+        <img id="galImg" src="" alt="">
+        <button class="gal-btn gal-prev" onclick="galMove(-1)">‹</button>
+        <button class="gal-btn gal-next" onclick="galMove(1)">›</button>
+        <div class="gal-dots" id="galDots"></div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tag-row">
+          <span class="modal-tag" id="modalTag"></span>
+        </div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-loc" id="modalLoc"></div>
+        <div class="detail-grid">
+          <div class="detail-item detail-price">
+            <div class="detail-label">ราคา</div>
+            <div class="detail-value" id="modalPrice"></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">เนื้อที่</div>
+            <div class="detail-value" id="modalArea"></div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">ประเภท</div>
+            <div class="detail-value" id="modalType"></div>
+          </div>
+        </div>
+        <div class="modal-section-label">รายละเอียด</div>
+        <div class="modal-desc-text" id="modalDesc"></div>
+       <div class="modal-cta" style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <a href="tel:0882692553" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+        โทรติดต่อ
+    </a>
+
+    <a href="https://line.me/ti/p/~YOUR_ID" target="_blank" class="btn-line">
+        <svg width="16" height="16" viewBox="0 0 40 40" fill="white"><path d="M20 2C10.06 2 2 9.16 2 17.96c0 5.87 3.7 11.01 9.27 13.93-.4 1.5-1.47 5.43-1.68 6.27-.26 1.02.37 1.01.78.74.32-.21 5.1-3.46 7.17-4.87.73.1 1.48.15 2.24.15 9.94 0 18-7.16 18-15.96C38 9.16 29.94 2 20 2z"/></svg>
+        ติดต่อ LINE
+    </a>
+
+    <a href="#" target="_blank" id="btnMap" class="btn-map">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+    </svg>
+     Maps
+</a>
+
+    <button class="btn-outline" onclick="closeDetail()" style="min-width: 100%; margin-top: 4px;">ปิดหน้าต่าง</button>
+</div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="page">
+    <div class="nav">
+      <img src="img/logo.png" class="logo">
+    </div>
+
+    <div class="hero">
+      <div class="hero-left">
+       
+        <h1>บ้าน&ที่ดินสวย<br><span>ByOnkanok</span></h1>
+        <div class="hero-sub">รวมที่ดินสวย ทำเลทอง ราคาดีที่สุดในพื้นที่</div>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+      <span class="filters-label">กรอง :</span>
+      <button class="chip active" data-f="all">ทั้งหมด</button>
+      <button class="chip" data-f="house">บ้านมือ 1/2</button>
+      <button class="chip" data-f="landhouse">ที่ดินเหมาะปลูกบ้าน</button>
+      <button class="chip" data-f="large-land">ที่แปลงใหญ่</button>
+      <div class="hero-stat">
+        <div class="hero-stat-n" id="count">12</div>
+        <div class="hero-stat-l">ผลการค้นหา</div>
+      </div>
+    </div>
+
+    <div class="sec-label">รายการที่ดิน</div>
+    <div class="grid" id="grid"></div>
+
+    <footer>© 2026 LAND PRIME · All rights reserved</footer>
+
+    <div class="fab-wrapper">
+  <div class="fab-options" id="fabOptions">
+    <a href="https://www.facebook.com/profile.php?id=61585932872107" target="_blank" class="fab-mini fb" title="Facebook">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+    </a>
+    <a href="https://line.me/ti/p/~YOUR_ID" target="_blank" class="fab-mini line" title="LINE">
+      <svg viewBox="0 0 40 40" width="22" height="22" fill="white"><path d="M20 2C10.06 2 2 9.16 2 17.96c0 5.87 3.7 11.01 9.27 13.93-.4 1.5-1.47 5.43-1.68 6.27-.26 1.02.37 1.01.78.74.32-.21 5.1-3.46 7.17-4.87.73.1 1.48.15 2.24.15 9.94 0 18-7.16 18-15.96C38 9.16 29.94 2 20 2z"/></svg>
+    </a>
+    <a href="tel:0882692553" class="fab-mini tel" title="โทรสอบถาม">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.81 12.81 0 0 0 .62 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.81 12.81 0 0 0 2.81.62A2 2 0 0 1 22 18.92z"></path></svg>
+    </a>
+  </div>
+
+ <button class="fab-main" id="fabMain" onclick="toggleFAB()" aria-label="ติดต่อเรา">
+  <img src="img/other/call.png" alt="Call Center" class="fab-icon-img-full">
+</button>
+</div>
+
+  </div>
+
+
+
+  <script>
+
+    function toggleFAB() {
+  document.getElementById('fabMain').classList.toggle('active');
+  document.getElementById('fabOptions').classList.toggle('show');
+}
+    /* ── Gallery state ── */
+    let galImages = [];
+    let galIndex = 0;
+
+    // Map ภาษาไทยสำหรับแสดงผล
+    const typeMap = {
+      'house': 'บ้านมือ 1/2',
+      'landhouse': 'ที่ดินเหมาะปลูกบ้าน',
+      'large-land': 'ที่แปลงใหญ่'
+    };
+
+   function openDetail(idx, imgIdx) {
+  const d = DATA[idx];
+  
+  // เปลี่ยนจาก d.images เป็น d.gallery ให้ตรงกับข้อมูลด้านล่าง
+  galImages = (d.gallery && d.gallery.length > 0) ? d.gallery : [IMGS[idx % IMGS.length]];
+  
+  galIndex = 0;
+
+  document.getElementById('galImg').src = galImages[galIndex];
+  document.getElementById('modalTitle').textContent = d.title;
+  document.getElementById('modalPrice').textContent = d.price + ' บาท';
+  document.getElementById('modalArea').textContent = d.area;
+  document.getElementById('modalDesc').textContent = d.desc;
+  
+  document.getElementById('modalType').textContent = typeMap[d.type] || 'ไม่ระบุ';
+
+  const mapBtn = document.getElementById('btnMap');
+  if (d.map) {
+      mapBtn.href = d.map;
+      mapBtn.style.display = 'flex'; // แสดงปุ่มเมื่อมีข้อมูล
+  } else {
+      mapBtn.href = '#';
+      mapBtn.style.display = 'none'; // ซ่อนปุ่มถ้าไม่มีข้อมูล map
+  }
+
+  const locEl = document.getElementById('modalLoc');
+  locEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M12 21s-7-6.5-7-11a7 7 0 0114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>${d.loc}`;
+
+  const tagEl = document.getElementById('modalTag');
+  tagEl.className = `modal-tag tag-${d.type}`;
+  tagEl.textContent = typeMap[d.type] || 'ไม่ระบุ';
+
+  
+
+  buildDots();
+  document.getElementById('detailModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+    function closeDetail() {
+      document.getElementById('detailModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function overlayClick(e) {
+      if (e.target === document.getElementById('detailModal')) closeDetail();
+    }
+
+    function buildDots() {
+      const container = document.getElementById('galDots');
+      container.innerHTML = galImages.map((_, i) =>
+        `<div class="gal-dot ${i === galIndex ? 'active' : ''}" onclick="galJump(${i})"></div>`
+      ).join('');
+    }
+
+    function galMove(dir) {
+      galIndex = (galIndex + dir + galImages.length) % galImages.length;
+      document.getElementById('galImg').src = galImages[galIndex];
+      buildDots();
+    }
+
+    function galJump(i) {
+      galIndex = i;
+      document.getElementById('galImg').src = galImages[galIndex];
+      buildDots();
+    }
+    /* ── Animated background ── */
+    (function () {
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, blobs, lines;
+      function resize() { W = canvas.width = window.innerWidth; H = canvas.height = document.body.scrollHeight; }
+      function initBlobs() {
+        blobs = Array.from({ length: 6 }, (_, i) => ({
+          x: Math.random()*W, y: Math.random()*H,
+          r: 180+Math.random()*220,
+          dx:(Math.random()-.5)*.4, dy:(Math.random()-.5)*.4,
+          hue: i%2===0 ? '#b5d4f4' : '#c0dd97',
+        }));
+      }
+      function initLines() {
+        lines = Array.from({ length: 22 }, () => ({
+          x:Math.random()*W, y:Math.random()*H,
+          len:40+Math.random()*80,
+          angle:Math.random()*Math.PI*2,
+          speed:.003+Math.random()*.005,
+          alpha:.07+Math.random()*.08,
+        }));
+      }
+      function draw() {
+        ctx.clearRect(0,0,W,H);
+        blobs.forEach(b => {
+          b.x+=b.dx; b.y+=b.dy;
+          if(b.x<-b.r)b.x=W+b.r; if(b.x>W+b.r)b.x=-b.r;
+          if(b.y<-b.r)b.y=H+b.r; if(b.y>H+b.r)b.y=-b.r;
+          const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+          g.addColorStop(0,b.hue+'cc'); g.addColorStop(1,b.hue+'00');
+          ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+          ctx.fillStyle=g; ctx.fill();
+        });
+        lines.forEach(l => {
+          l.angle+=l.speed;
+          const x2=l.x+Math.cos(l.angle)*l.len, y2=l.y+Math.sin(l.angle)*l.len;
+          ctx.beginPath(); ctx.moveTo(l.x,l.y); ctx.lineTo(x2,y2);
+          ctx.strokeStyle=`rgba(24,95,165,${l.alpha})`; ctx.lineWidth=1; ctx.stroke();
+        });
+        requestAnimationFrame(draw);
+      }
+      function init(){ resize(); initBlobs(); initLines(); draw(); }
+      window.addEventListener('resize',()=>{ resize(); initBlobs(); });
+      document.fonts.ready.then(init);
+    })();
+
+    /* ── Data ── */
+    const IMGS = [
+      'img/44.webp','img/88.webp','img/10.webp','img/11.webp','img/14.webp','img/13.webp','img/12.webp','img/24.webp','img/15.webp','img/16.webp','img/17.webp','img/18.webp','img/20.webp','img/21.webp','img/23.webp','img/22.webp','img/99.webp','img/25.webp',
+    ];
+
+    /* ── 2. แก้ไขข้อมูลใน DATA ── */
+    const DATA = [
+      {title:'ติดถนนเส้น แม่ทะ-บ้านกล้วย',map: 'https://maps.app.goo.gl/fDf4KGpGXNbWGr36A',loc:'อ.เมือง ลำปาง', price:'290,000', type:'landhouse', top:false, area:'74 ตร.ว.', desc:'ที่ดินทำเลดี ติดถนนสายหลักแม่ทะ–บ้านกล้วย เหมาะสำหรับสร้างบ้านพักอาศัย การเดินทางสะดวก ใกล้ชุมชน ราคาพิเศษ',
+      gallery: ['img/1/3.webp', 'img/1/1.webp', 'img/1/2.webp'] },
+      { title:'หมู่บ้านเด่นสโรชา', loc:'ต.พิชัย อ.เมือง ลำปาง',map: 'https://maps.app.goo.gl/v6auFGytfLS6wrFo6', price:'450,000', type:'landhouse', top:true, area:'99 ตร.ว.', desc:'บ้านสวยมือสอง สภาพดีพร้อมอยู่ ทำเลทองใจกลางเมือง ติดถนนสายหลัก เดินทางสะดวกทุกทิศทาง',
+      gallery: ['img/2/1.webp', 'img/2/2.webp']},
+      { title:'ตรงข้ามบ้านต้นมื่น', loc:'ต.พิชัย อ.เมือง ลำปาง', price:'450,000', type:'landhouse', top:true, area:'84 ตร.ว.', desc:'ที่ดินแปลงใหญ่ ติดริมแม่น้ำวัง วิวสวยงามมาก บรรยากาศเงียบสงบ เหมาะสำหรับสร้างบ้านสวนริมน้ำ หรือลงทุน' ,
+      gallery: ['img/10.png', 'img/3/1.webp']},
+      { title:'พรประสิทธิ์ซอย 4', loc:'ต.บ่อแฮ้ว อ.เมือง ลำปาง', price:'890,000', type:'landhouse', top:true, area:'107 ตร.ว.', desc:'ที่ดินวิวธรรมชาติสวยงาม บรรยากาศเงียบสงบ เหมาะสำหรับสร้างบ้านพักอาศัย' ,
+      gallery: ['img/4/1.webp', 'img/4/2.webp']},
+      { title:'ใกล้บ้านศรีสง่า', loc:'ต.ต้นธงชัย อ.เมือง ลำปาง', price:'450,000', type:'landhouse', top:false, area:'100 ตร.ว.', desc:'ราคาดีที่สุดในย่านแม่ทะ ทางเข้าออกสะดวก ใกล้ถนนสายหลัก เหมาะสร้างบ้าน',gallery: ['img/5/1.webp', 'img/5/2.webp']},
+      { title:'เจน&จอย 2', loc:'ต.ปงแสงทอง อ.เมือง ลำปาง', price:'490,000', type:'landhouse', top:false, area:'90 ตร.ว.', desc:'ที่ดินแปลงใหญ่ มีสายน้ำผ่านตลอดปี อากาศดี ห่างจากตัวอำเภอไม่ไกล',gallery: ['img/6/1.webp', 'img/6/2.webp'] },
+      { title:'บ้านดงสันเงิน', loc:'ต.บ่อแฮ้ว อ.เมือง ลำปาง', price:'500,000', type:'landhouse', top:false, area:'85 ตร.ว.', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่',gallery: ['img/7/1.webp', 'img/7/2.webp'] },
+      { title:'ใกล้วัดร่องกอก', loc:'ต.บ่อแฮ้ว อ.เมือง ลำปาง', price:'1,500,000', type:'landhouse', top:false, area:'1-2-30 ไร่', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่',gallery: ['img/13/1.webp', 'img/13/3.webp'] },
+      { title:'บ้านสวยสไตล์โมเดิร์น', loc:'อ.เมือง ลำปาง', price:'1,450,000', type:'house', top:false, area:'60 ตร.ว.', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่',gallery: ['img/8/1.webp', 'img/8/2.webp','img/8/3.webp','img/8/5.webp','img/8/4.webp'] },
+      { title:'บ้านหรูใจกลางเมือง', loc:'อ.เมือง ลำปาง', price:'6,500,000', type:'house', top:false, area:'60 ตร.ว.', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่',gallery: ['img/9/1.webp', 'img/9/2.webp','img/9/3.webp','img/9/4.webp'] },
+      { title:'บ้านสวยสไตล์โมเดิร์น (สร้างได้70%)', loc:'อ.เมือง ลำปาง', price:'1,250,000', type:'house', top:false, area:'60 ตร.ว.', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่',gallery: ['img/10/1.webp', 'img/10/2.webp','img/10/3.webp','img/10/4.webp'] },
+      { title:'บ้านกลางป่าเหมี้ยง', loc:'ต.แจ้ซ้อน อ.เมืองปาน ลำปาง', price:'2,500,000', type:'house', top:false, area:'60 ตร.ว.', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่',gallery: ['img/11/1.webp', 'img/11/2.webp','img/11/3.webp','img/11/4.webp'] },
+      { title:'หลังเซเว่นแจ้ห่ม', loc:'ต.วิเชตนคร อ.แจ้ห่ม ลำปาง ', price:'1,800,000', type:'house', top:false, area:'60 ตร.ว.', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่',gallery: ['img/12/1.webp', 'img/12/2.webp'] },
+      { title:'บ้านสวยสไตล์โมเดิร์น', loc:'อ.เมือง ลำปาง', price:'250,000/ไร่', type:'large-land', top:false, area:'21 ไร่', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่' },
+      { title:'บ้านสวยสไตล์โมเดิร์น', loc:'อ.เมือง ลำปาง', price:'1,250,000', type:'large-land', top:false, area:'5-2-30 ไร่', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่' },
+      { title:'หลังเซเว่นแจ้ห่ม', loc:'อ.แจ้ห่ม ลำปาง', price:'1,800,000', type:'large-land', top:false, area:'4-2-20 ไร่', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่' },
+      { title:'หลังเซเว่นแจ้ห่ม', loc:'อ.แจ้ห่ม ลำปาง', price:'5,500,000', type:'large-land', top:false, area:'2-1-80 ไร่', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่' },
+      { title:'ใกล้วัดพระธาตุลำปางหลวง', loc:'อ.แจ้ห่ม ลำปาง', price:'1,250,000', type:'large-land', top:false, area:'2-1-65 ไร่', desc:'บ้านเดี่ยวชั้นเดียวสร้างใหม่ วัสดุพรีเมียม ดีไซน์ทันสมัย พร้อมเข้าอยู่' },
+      // สามารถเพิ่มรายการอื่นๆ โดยระบุ type ให้ตรงกับ 'house', 'landhouse' หรือ 'large-land'
+    ];
+
+    const pinSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11a7 7 0 0114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>`;
+
+    const grid = document.getElementById('grid');
+    const countEl = document.getElementById('count');
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 60);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    /* ── 3. แก้ไขฟังก์ชันการแสดงผล (Render) ── */
+    function render(f) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.f === f));
+      let items = DATA.map((d, i) => ({ ...d, _i: i }));
+      
+      // ตรรกะการ Filter
+      if (f !== 'all') items = items.filter(d => d.type === f);
+      
+      countEl.textContent = items.length;
+
+      if (!items.length) { grid.innerHTML = '<div class="empty">ไม่พบรายการในหมวดนี้</div>'; return; }
+
+      grid.innerHTML = items.map((d, i) => `
+        <div class="card">
+          <div class="card-img">
+            <img src="${IMGS[d._i % IMGS.length]}" alt="${d.title}" loading="lazy"/>
+            <div class="card-tag tag-${d.type}">${typeMap[d.type]}</div>
+
+          </div>
+          <div class="card-body">
+            <div class="card-loc">${pinSVG} ${d.loc}</div>
+            <div class="card-name">${d.title}</div>
+            <div class="card-desc">${d.desc.substring(0, 55)}…</div>
+            <div class="card-foot">
+              <div class="card-price">${d.price}<small>บาท</small></div>
+              <div class="card-area">${d.area}</div>
+            </div>
+            <button class="card-btn" onclick="openDetail(${d._i}, ${d._i})">ดูรายละเอียด / ติดต่อสอบถาม</button>
+          </div>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.card').forEach(c => observer.observe(c));
+      setTimeout(() => { document.getElementById('bgCanvas').height = document.body.scrollHeight; }, 100);
+    }
+
+    document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => render(c.dataset.f)));
+    render('all');
+  </script>
+</body>
+</html>
