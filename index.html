@@ -300,40 +300,52 @@
     margin-top: 20px;
 }
 
+
+
 /* สไตล์ปุ่มมาตรฐาน */
+/* สไตล์ปุ่มมาตรฐาน (ปรับปรุงใหม่) */
 .btn-cta {
-    height: 50px;
+    height: 45px;
     border-radius: 12px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    align-items: center;    /* จัดไอคอนและตัวอักษรให้อยู่กึ่งกลางแนวตั้ง */
+    justify-content: center; /* จัดให้อยู่กึ่งกลางแนวนอน */
+    gap: 10px;               /* ระยะห่างระหว่างไอคอนกับตัวหนังสือ */
     text-decoration: none;
     font-family: 'Prompt', sans-serif;
     font-size: 15px;
-    font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: transform 0.1s, opacity 0.2s; /* ใช้แค่ที่จำเป็นเพื่อให้ลื่น */
+    transition: transform 0.1s, opacity 0.2s;
 }
 
-.btn-cta:active { transform: scale(0.98); } /* Feedback ตอนกด */
+/* --- ส่วนที่เพิ่มใหม่: บังคับให้ไอคอนทั้ง SVG และรูปภาพตรงกันเป๊ะ --- */
+.btn-cta svg, 
+.btn-cta .cta-icon-img {
+    width: 20px;           /* บังคับขนาดให้เท่ากัน */
+    height: 20px;          /* บังคับขนาดให้เท่ากัน */
+    object-fit: contain;    /* ป้องกันรูปเบี้ยว */
+    flex-shrink: 0;        /* ป้องกันโดนบีบ */
+    display: block;        /* แก้ปัญหาช่องว่างเล็กๆ ใต้รูปภาพ */
+}
 
-.btn-fb { background: #1877F2; color: white !important; }
+.btn-cta:active { transform: scale(0.98); }
+
+.btn-fb { background: #065dcf; color: white !important; }
 .btn-map { background: #0F172A; color: white !important; }
 .btn-close-modal { background: #f1f5f9; color: #64748b !important; font-weight: 400; }
 
 /* --- Responsive สำหรับ Tablet ขึ้นไป (จอใหญ่) --- */
 @media (min-width: 600px) {
     .modal-cta {
-        flex-direction: row; /* เรียงแนวนอนบนจอใหญ่ */
+        flex-direction: row; 
         flex-wrap: wrap;
     }
     .btn-fb, .btn-map {
-        flex: 1; /* แบ่งพื้นที่กันคนละครึ่ง */
+        flex: 1; 
     }
     .btn-close-modal {
-        width: 100%; /* ปุ่มปิดอยู่ข้างล่างยาวๆ */
+        width: 100%; 
     }
 }
 
@@ -435,6 +447,7 @@
 .fab-mini.tel { background: var(--blue-mid); }
 .fab-mini.fb { background: #1877F2; }
 
+
 /* --- ส่วนของ Responsive (ทำให้เล็กลงในมือถือ) --- */
 @media (max-width: 480px) {
   .fab-wrapper {
@@ -466,6 +479,8 @@
     transform: translateY(20px) scale(0.6);
     gap: 8px;
   }
+
+ 
 
   
 }
@@ -505,15 +520,17 @@
        <div class="modal-cta">
     <!-- ปุ่ม Facebook (ลิงก์ตรงแปลง) -->
     <a href="#" target="_blank" id="btnFB" class="btn-cta btn-fb">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        <img src="img/other/face-icon.png" alt="Facebook" class="cta-icon-img">
         <span>ดูรายละเอียดบน Facebook</span>
     </a>
 
     <!-- ปุ่ม Maps (พิกัดแปลง) -->
-    <a href="#" target="_blank" id="btnMap" class="btn-cta btn-map">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-        <span>เปิดแผนที่ Google Maps</span>
-    </a>
+    <!-- ปุ่ม Maps (พิกัดแปลง) -->
+<a href="#" target="_blank" id="btnMap" class="btn-cta btn-map">
+    <!-- ใช้ img แทน svg -->
+    <img src="img/other/maps-icon.png" alt="Google Maps" class="cta-icon-img">
+    <span>เปิดแผนที่ Google Maps</span>
+</a>
 
     <!-- ปุ่มปิดหน้าต่าง -->
     <button class="btn-cta btn-close-modal" onclick="closeDetail()">ปิดหน้านี้</button>
