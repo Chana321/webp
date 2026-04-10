@@ -484,6 +484,18 @@
 
   
 }
+
+/* --- เพิ่มเติมเพื่อความลื่นไหลบนมือถือ --- */
+.chip, 
+.btn-cta, 
+.card-btn, 
+.fab-main, 
+.fab-mini, 
+.gal-btn, 
+.modal-close {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
   </style>
 </head>
 
@@ -714,7 +726,12 @@ if (d.map) {
       const canvas = document.getElementById('bgCanvas');
       const ctx = canvas.getContext('2d');
       let W, H, blobs, lines;
-      function resize() { W = canvas.width = window.innerWidth; H = canvas.height = document.body.scrollHeight; }
+      function resize() { 
+    // ใช้ความกว้างของหน้าจอที่มองเห็นจริงๆ
+    W = canvas.width = window.innerWidth; 
+    // ใช้ความสูงของหน้าจอ (Viewport) แทน scrollHeight เพราะ Canvas เราเป็นแบบ Fixed (นิ่งติดจอ)
+    H = canvas.height = window.innerHeight; 
+}
       function initBlobs() {
         blobs = Array.from({ length: 6 }, (_, i) => ({
           x: Math.random()*W, y: Math.random()*H,
