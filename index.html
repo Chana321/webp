@@ -149,7 +149,7 @@
     .card-body{padding:16px 18px 18px}
     .card-loc{font-size:11px;color:var(--gray);margin-bottom:5px;display:flex;align-items:center;gap:4px}
     .card-loc svg{width:11px;height:11px;flex-shrink:0}
-    .card-name{font-size:16px;font-weight:600;color:#0f172a;margin-bottom:6px}
+    .card-name{font-size:1px;font-weight:600;color:#0f172a;margin-bottom:6px}
     .card-desc{font-size:13px;color:var(--gray);margin-bottom:14px;line-height:1.55}
     .card-foot{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
     .card-price{font-size:18px;font-weight:700;color:var(--blue)}
@@ -189,6 +189,7 @@
   width: 100%;
   aspect-ratio: 16 / 9; /* 🔥 ตัวนี้สำคัญ */
   overflow: hidden;
+  touch-action: pan-y; 
 }
 
 .gal-track {
@@ -719,6 +720,7 @@ if (d.map) {
   const track = document.getElementById('galTrack');
   track.style.transform = `translateX(-${galIndex * 100}%)`;
 
+
   buildDots();
 }
     /* ── Animated background ── */
@@ -732,6 +734,34 @@ if (d.map) {
     // ใช้ความสูงของหน้าจอ (Viewport) แทน scrollHeight เพราะ Canvas เราเป็นแบบ Fixed (นิ่งติดจอ)
     H = canvas.height = window.innerHeight; 
 }
+
+/* ── ส่วนที่เพิ่มใหม่: ระบบ Swipe (ปัดนิ้ว) ── */
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // ดักจับเหตุการณ์ที่ galTrack (พื้นที่รูปภาพ)
+    const trackEl = document.getElementById('galTrack');
+
+    trackEl.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    trackEl.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diff = touchStartX - touchEndX;
+      const threshold = 50; // ระยะขั้นต่ำในการปัด (พิกเซล)
+
+      if (diff > threshold) {
+        // นิ้วปัดจากขวาไปซ้าย (เลื่อนดูรูปถัดไป) -> ให้ทำงาน
+        galMove(1);
+      } 
+      // ถ้า diff < -threshold (นิ้วปัดจากซ้ายไปขวาเพื่อย้อนกลับ) 
+      // เราจะไม่ใส่ Code อะไรเลย เพื่อไม่ให้มันทำงานและไม่ไปกวน Gesture ของ Facebook
+    }
       function initBlobs() {
         blobs = Array.from({ length: 6 }, (_, i) => ({
           x: Math.random()*W, y: Math.random()*H,
