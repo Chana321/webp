@@ -147,9 +147,9 @@
 
     .card-fav{position:absolute;top:11px;right:11px;width:32px;height:32px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px}
     .card-body{padding:16px 18px 18px}
-    .card-loc{font-size:11px;color:var(--gray);margin-bottom:5px;display:flex;align-items:center;gap:4px}
+    .card-loc{font-size:11px;color:var(--gray);margin-bottom:5px;display:flex;align-items:center;gap:4px;}
     .card-loc svg{width:11px;height:11px;flex-shrink:0}
-    .card-name{font-size:1px;font-weight:600;color:#0f172a;margin-bottom:6px}
+    .card-name{font-size:15px;font-weight:600;color:#0f172a;margin-bottom:6px}
     .card-desc{font-size:13px;color:var(--gray);margin-bottom:14px;line-height:1.55}
     .card-foot{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
     .card-price{font-size:18px;font-weight:700;color:var(--blue)}
@@ -724,16 +724,12 @@ if (d.map) {
   buildDots();
 }
     /* ── Animated background ── */
-    (function () {
-      const canvas = document.getElementById('bgCanvas');
-      const ctx = canvas.getContext('2d');
-      let W, H, blobs, lines;
+    
       function resize() { 
     // ใช้ความกว้างของหน้าจอที่มองเห็นจริงๆ
     W = canvas.width = window.innerWidth; 
     // ใช้ความสูงของหน้าจอ (Viewport) แทน scrollHeight เพราะ Canvas เราเป็นแบบ Fixed (นิ่งติดจอ)
-    H = canvas.height = window.innerHeight; 
-}
+    H = canvas.height = window.innerHeight; }
 
 /* ── ส่วนที่เพิ่มใหม่: ระบบ Swipe (ปัดนิ้ว) ── */
     let touchStartX = 0;
@@ -801,7 +797,7 @@ if (d.map) {
       function init(){ resize(); initBlobs(); initLines(); draw(); }
       window.addEventListener('resize',()=>{ resize(); initBlobs(); });
       document.fonts.ready.then(init);
-    })();
+    
 
     /* ── Data ── */
     const IMGS = [
@@ -882,7 +878,6 @@ if (d.map) {
       `).join('');
 
       grid.querySelectorAll('.card').forEach(c => observer.observe(c));
-      setTimeout(() => { document.getElementById('bgCanvas').height = document.body.scrollHeight; }, 100);
     }
 
     document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => render(c.dataset.f)));
