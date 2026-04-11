@@ -16,6 +16,7 @@
       --coral-light:#FAECE7;--coral-dark:#993C1D;
       --yellow-light:#FEF9C3;--yellow-dark:#854D0E;
       --gray:#6b7280;--border:#e5e7eb;--bg:#f0f4f9;
+       --nav-height: 70px;
     }
     body{font-family:'Prompt',sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;overflow-x:hidden}
     .bg-blobs {
@@ -27,7 +28,103 @@
     z-index: -1; /* ให้ไปอยู่หลังสุด */
     overflow: hidden;
     pointer-events: none;
+    padding-top: var(--nav-height); 
 }
+
+
+ /* --- Navbar --- */
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: var(--nav-height);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-container {
+        width: 100%;
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .nav-logo {
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.05;
+        
+    }
+
+    .logo-top {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1c1e; /* สีดำเข้ม */
+    }
+
+    .logo-bottom {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--blue-mid); /* สีฟ้า ByOnkanok */
+        margin-top: -2px;
+    }
+
+    .nav-menu {
+        display: flex;
+        gap: 25px;
+        list-style: none;
+    }
+
+    .nav-menu a {
+        text-decoration: none;
+        color: #4b5563;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .nav-menu a:hover { color: var(--blue); }
+
+    .nav-toggle {
+        display: none; /* ซ่อนในคอม */
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .nav-toggle svg { width: 28px; height: 28px; stroke: var(--blue); }
+
+    /* --- Mobile Navigation (768px) --- */
+    @media (max-width: 768px) {
+        .nav-toggle { display: block; }
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            flex-direction: column;
+            padding: 100px 30px;
+            gap: 20px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-menu.active { transform: translateX(0); }
+        .nav-menu a { font-size: 16px; width: 100%; display: block; }
+    }
 
 .blob {
     position: absolute;
@@ -57,7 +154,7 @@
 
     #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
     .page{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:0 28px 60px}
-    .hero{padding:56px 0 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:32px}
+    .hero{padding:90px 0 20px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:32px}
     .hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--blue);background:var(--blue-light);padding:5px 14px;border-radius:20px;margin-bottom:18px;text-transform:uppercase}
     .hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue-mid);animation:pulse 2s infinite}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
@@ -539,6 +636,31 @@
 
 <body>
 
+  <nav class="navbar">
+    <div class="nav-container">
+     <a href="#" class="nav-logo">
+  <div class="logo-top">บ้าน&ที่ดินสวย</div>
+  <div class="logo-bottom">ByOnkanok</div>
+</a>
+      
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="#">หน้าแรก</a></li>
+        <li><a href="#grid">รายการที่ดิน</a></li>
+        <li><a href="https://www.facebook.com/profile.php?id=61585932872107" target="_blank">ติดตามเรา</a></li>
+        <li><a href="tel:0882692553">โทรสอบถาม</a></li>
+      </ul>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">
+        <!-- ใช้ SVG แทนภาพ โหลดไวและคมชัดทุกหน้าจอ -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+</nav>
+
   <!-- พื้นหลังแบบลูกบอลสีฟุ้งๆ -->
 <div class="bg-blobs">
   <div class="blob blob-1"></div>
@@ -604,7 +726,8 @@
     <div class="hero">
       <div class="hero-left">
        
-        <h1>บ้าน&ที่ดินสวย<br><span>ByOnkanok</span></h1>
+        
+       
         <div class="hero-sub">รวมที่ดินสวย ทำเลทอง ราคาดีที่สุดในพื้นที่</div>
       </div>
     </div>
@@ -653,6 +776,30 @@
 
     let galImages = [];
     let galIndex = 0;
+
+    // --- สคริปต์ควบคุม Navbar ---
+const navToggle = document.getElementById('navToggle');
+const navMenu = document.getElementById('navMenu');
+
+// เปิด-ปิดเมนู
+navToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navMenu.classList.toggle('active');
+});
+
+// คลิกที่อื่นเพื่อปิดเมนู (User Experience ที่ดี)
+document.addEventListener('click', (e) => {
+    if (!navMenu.contains(e.target) && navMenu.classList.contains('active')) {
+        navMenu.classList.remove('active');
+    }
+});
+
+// ปิดเมนูเมื่อกดเลือกหัวข้อ
+document.querySelectorAll('.nav-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+    });
+});
 
     function toggleFAB() {
   document.getElementById('fabMain').classList.toggle('active');
