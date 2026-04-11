@@ -18,6 +18,43 @@
       --gray:#6b7280;--border:#e5e7eb;--bg:#f0f4f9;
     }
     body{font-family:'Prompt',sans-serif;background:var(--bg);color:#1a1a1a;min-height:100vh;overflow-x:hidden}
+    .bg-blobs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* ให้ไปอยู่หลังสุด */
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px); /* ทำให้สีฟุ้ง */
+    opacity: 0.5; /* ความโปร่งใส */
+}
+
+/* ลูกที่ 1: เล็กลง */
+.blob-1 {
+    top: -50px;
+    left: -50px;
+    width: 300px;  /* ลดจาก 500px */
+    height: 300px; /* ลดจาก 500px */
+    background: #b5d4f4;
+}
+
+/* ลูกที่ 2: เล็กลง */
+.blob-2 {
+    bottom: -30px;
+    right: -30px;
+    width: 350px;  /* ลดจาก 600px */
+    height: 350px; /* ลดจาก 600px */
+    background: #b5d4f4;
+}
+
+
     #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
     .page{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:0 28px 60px}
     .hero{padding:56px 0 40px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:32px}
@@ -502,6 +539,13 @@
 
 <body>
 
+  <!-- พื้นหลังแบบลูกบอลสีฟุ้งๆ -->
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
   <div class="modal-overlay" id="detailModal" onclick="overlayClick(event)">
     <div class="modal-box">
       <div class="modal-gallery">
@@ -552,7 +596,7 @@
     </div>
   </div>
 
-  <canvas id="bgCanvas"></canvas>
+  
 
   <div class="page">
     
@@ -725,11 +769,7 @@ if (d.map) {
 }
     /* ── Animated background ── */
     
-      function resize() { 
-    // ใช้ความกว้างของหน้าจอที่มองเห็นจริงๆ
-    W = canvas.width = window.innerWidth; 
-    // ใช้ความสูงของหน้าจอ (Viewport) แทน scrollHeight เพราะ Canvas เราเป็นแบบ Fixed (นิ่งติดจอ)
-    H = canvas.height = window.innerHeight; }
+     
 
 /* ── ส่วนที่เพิ่มใหม่: ระบบ Swipe (ปัดนิ้ว) ── */
     let touchStartX = 0;
